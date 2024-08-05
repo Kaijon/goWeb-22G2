@@ -1,6 +1,6 @@
 {
   "server": {
-    "http_port": ":8083"
+    "http_port": ":5142"
   },
   "streams": {
     "CA-NF22G2": {
