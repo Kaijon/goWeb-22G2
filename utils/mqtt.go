@@ -20,7 +20,8 @@ const (
 	MQTT_INTERNAL_TOPIC_EVENT     = "event"
 	MQTT_INTERNAL_TOPIC_REC       = "status/recording/#"
 	MQTT_INTERNAL_TOPIC_REC_CA42A = "status/recording/ca42a"
-	MQTT_EXTERNAL_BROKER_URI      = "tcp://192.168.5.8:1883"
+	MQTT_INTERNAL_TOPIC_INFO      = "info/#"
+	MQTT_EXTERNAL_BROKER_URI      = "tcp://127.0.0.1:1883"
 	MQTT_INTERNAL_BROKER_URI      = "tcp://127.0.0.1:8083"
 	MQTT_EXTERNAL_CLIENT_ID       = "MqttEx"
 	MQTT_INTERNAL_CLIENT_ID       = "MqttIn"
@@ -74,7 +75,7 @@ func createInClient(brokerIp, id string) mqtt.Client {
 		(token.Error())
 	}
 
-	if token := client.Subscribe(MQTT_INTERNAL_TOPIC_REC, 0, mqttInHandler); token.Wait() && token.Error() != nil {
+	if token := client.Subscribe(MQTT_INTERNAL_TOPIC_INFO, 0, mqttInHandler); token.Wait() && token.Error() != nil {
 		log.Println(token.Error())
 	}
 

@@ -88,9 +88,9 @@ function handlePSEEventMessage(payloada) {
     }
 }
 
-let timerId = null;  // Declare timerId
-let startTime = new Date();  // Get the current system time
-window.startTime = startTime; // Make startTime global
+//let timerId = null;  // Declare timerId
+//let startTime = new Date();  // Get the current system time
+//window.startTime = startTime; // Make startTime global
 
 function handleRTCEventMessage(payloada) {
     // Stop the exist timer for tick function

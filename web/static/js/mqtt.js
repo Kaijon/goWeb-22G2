@@ -16,9 +16,8 @@ function mqtt_Connect_with_Broker_WS() {
     var ipAddress = extractIPAddressFromURL(currentURL);
 
     // Set the MQTT broker URL with the extracted IP address
-    WebSocket_MQTT_Broker_URL = "ws://" + ipAddress + ":1883/mqtt";
-    //WebSocket_MQTT_Broker_URL = "ws://" + ipAddress + ":8083/mqtt";
-    // WebSocket_MQTT_Broker_URL = "ws://" + ipAddress + ":8083";
+    //WebSocket_MQTT_Broker_URL = "ws://" + ipAddress + ":1883/mqtt";
+    WebSocket_MQTT_Broker_URL = "ws://" + ipAddress + ":8083/mqtt";
 
     MQTT_Client_ID = gen_MQTT_Client_ID();
     console.log("MQTT_Broker_URL:" + WebSocket_MQTT_Broker_URL + " MQTT_Client_ID:" + MQTT_Client_ID);

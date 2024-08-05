@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"time"
 
 	"github.com/deepch/vdk/format/rtspv2"
@@ -25,13 +24,13 @@ func serveStreams() {
 func RTSPWorkerLoop(name, url string, OnDemand bool) {
 	defer Config.RunUnlock(name)
 	for {
-		log.Println(name, "Stream Try Connect")
+		Log.Println(name, " >>> Stream Try Connect")
 		err := RTSPWorker(name, url, OnDemand)
 		if err != nil {
-			log.Println(err)
+			Log.Println(err)
 		}
 		if OnDemand && !Config.HasViewer(name) {
-			log.Println(name, ErrorStreamExitNoViewer)
+			Log.Println(name, ErrorStreamExitNoViewer)
 			return
 		}
 		time.Sleep(1 * time.Second)

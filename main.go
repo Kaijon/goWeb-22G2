@@ -14,20 +14,20 @@ import (
 func main() {
 	numProcs := runtime.GOMAXPROCS(0)
 	runtime.GOMAXPROCS(numProcs)
-	//Log.Infoln("GOMAXPROCS set to:", numProcs)
+	Log.Infoln("GOMAXPROCS set to:", numProcs)
 	workDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		log.Fatal(err)
+		Log.Fatal(err)
 	}
-	log.Printf("WORKDIR:", workDir)
+	Log.Infoln("WORKDIR:", workDir)
 	out, err := exec.Command("/usr/sbin/iptables -F").Output()
 	if err != nil {
 		log.Println(err)
 	}
-	log.Printf("Run iptables -F", out)
+	Log.Infoln("Run iptables -F", out)
 	//log.SetFlags(0)
 	//log.SetOutput(new(logWriter))
-	//LogInit()
+	LogInit()
 	//ListSsdp.Start()
 	//go StartSsdpLoop()
 	go utils.StartMqttInLoop()
@@ -39,10 +39,10 @@ func main() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-sigs
-		log.Println(sig)
+		Log.Println(sig)
 		done <- true
 	}()
-	log.Println("Server Start Awaiting Signal")
+	Log.Println("Server Start Awaiting Signal")
 	<-done
-	log.Println("Exiting")
+	Log.Println("Exiting")
 }

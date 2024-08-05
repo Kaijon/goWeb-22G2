@@ -5,29 +5,33 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"path"
+	"runtime"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/deepch/vdk/av"
+	"github.com/sirupsen/logrus"
 )
 
-//Config global
+// Config global
 var Config = loadConfig()
+var Log = logrus.New()
 
-//ConfigST struct
+// ConfigST struct
 type ConfigST struct {
 	mutex   sync.RWMutex
 	Server  ServerST            `json:"server"`
 	Streams map[string]StreamST `json:"streams"`
 }
 
-//ServerST struct
+// ServerST struct
 type ServerST struct {
 	HTTPPort string `json:"http_port"`
 }
 
-//StreamST struct
+// StreamST struct
 type StreamST struct {
 	URL      string `json:"url"`
 	Status   bool   `json:"status"`
@@ -77,11 +81,11 @@ func loadConfig() *ConfigST {
 	var tmp ConfigST
 	data, err := ioutil.ReadFile("config.json")
 	if err != nil {
-		log.Fatalln(err)
+		Log.Fatalln(err)
 	}
 	err = json.Unmarshal(data, &tmp)
 	if err != nil {
-		log.Fatalln(err)
+		Log.Fatalln(err)
 	}
 	for i, v := range tmp.Streams {
 		v.Cl = make(map[string]viewer)
@@ -163,9 +167,19 @@ func pseudoUUID() (uuid string) {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		Log.Println("Error: ", err)
 		return
 	}
 	uuid = fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 	return
+}
+
+func LogInit() {
+	Log.SetReportCaller(true)
+	Log.SetFormatter(&logrus.JSONFormatter{
+		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+			fileName := path.Base(frame.File) + ", line:" + strconv.Itoa(frame.Line)
+			return frame.Function, fileName
+		},
+	})
 }
