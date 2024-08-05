@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Information Page</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <script src="js/Jqueiry-3.5.1.min.js"></script> <!-- Add this line to load jQuery -->
+    <script src="js/mqtt.js"></script>
+</head>
+
+<body id="info-page">
+    <script>
+        var oinfoTimer;
+
+        function checkMqttAndSubscribe() {
+            if (isMqttConnected) {
+                console.log('isMattConnected is true... subscribe to topic /info')
+                defaultTopicSubscribes();
+            } else {
+                // set inner timer
+                console.log('isMattConnected is false... set inner timer');
+                oinfoTimer = setInterval(doInnerChk, 1000);
+            }
+        }
+
+        $(window).on('load', function () {
+            console.log(`DOM ready! MQTT is connected: ${isMqttConnected}`);
+            checkMqttAndSubscribe();
+            sessionStorage.setItem('isPageLoaded', 'true'); // Set the flag to true when the page is first loaded or F5
+        })
+
+        $(document).ready(function () {
+            // sessionStorage will be cleared when F5 but kept when reload.
+            var isPageLoaded = sessionStorage.getItem('isPageLoaded') === 'true';
+            if (isPageLoaded) { // Only run the code if the page has been loaded before
+                checkMqttAndSubscribe();
+            }
+        });
+
+        // we will use this function to monitor MQTT until INFO show up after DOM ready
+        function doInnerChk() {
+            console.log("doInnerChk() called! isMqttConnected=" + isMqttConnected);
+            // Get the card-body element by its ID
+            if (doesElementExist(SUB_INFO_AREA) && (isMqttConnected == true)) {
+                defaultTopicSubscribes();
+                clearTimeout(oinfoTimer);
+            }
+        }
+        function defaultTopicSubscribes() {
+            console.log("defaultTopicSubscribes() called!");
+            // Subscribe to the default topic
+            subscribeTopic(SUB_INFO_TOPIC);
+            subscribeTopic(SUB_EVENTS_TOPIC);
+        }
+    </script>
+    <div class="card">
+        <div class="header">About</div>
+        <hr>
+        <div id="message-receiver-info">
+            <div class="card-body" id="txt_sysInfo">
+                <p class="card-text">Getting information from device, please wait...</p>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        Sensorhub | Events
+        <div class="card-container">
+            <div class="card" style="max-width: 300px;">
+                <div class="card-body">
+                    <i class="fa-regular fa-clock"></i>
+                    <label for="rtcStatus">RTC status: </label>
+                    <style>
+                        .fa-solid.fa-clock-rotate-left:active {
+                            transform: scale(0.9);
+                        }
+
+                        .fa-solid.fa-clock-rotate-left:hover {
+                            color: orange;
+                        }
+                    </style>
+
+                    <i class="fa-solid fa-clock-rotate-left" onclick="syncPCTime()"></i>
+                </div>
+            </div>
+            <div class="card" style="max-width: 180px;">
+                <div class="card-body">
+                    <i class="fa-solid fa-ethernet"></i>/<i id="pseIcon" class="fa-solid fa-toggle-off"></i>
+                    <label for="pseStatus">PSE status: </label>
+                </div>
+            </div>
+            <div class="card" style="max-width: 180px;">
+                <div class="card-body">
+                    <i id="thermalIcon" class="fa-solid fa-temperature-full"></i>
+                    <label for="thermalStatus">Thermal status: </label>
+                </div>
+            </div>
+            <div class="card" style="max-width: 180px;">
+                <div class="card-body">
+                    <i id="usbIcon" class="fa-brands fa-usb" style="color: #c2c5db;"></i>
+                    <label for="usbPlug">USB pluged status: </label>
+                </div>
+            </div>
+            <div class="card" style="width: auto;">
+                <div class="card-body">
+                    <i id="crashIcon" class="fa-solid fa-car-burst"></i>
+                    <label for="crashStatus">crash sensor status: </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

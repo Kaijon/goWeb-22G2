@@ -17,10 +17,10 @@ func serveHTTP() {
 	router := gin.Default()
 	gin.SetMode(gin.DebugMode)
 	router.LoadHTMLGlob("web/templates/*")
-	router.GET("/", func(c *gin.Context) {
+	router.GET("/liveview", func(c *gin.Context) {
 		fi, all := Config.list()
 		sort.Strings(all)
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+		c.HTML(http.StatusOK, "liveview.tmpl", gin.H{
 			"port":     Config.Server.HTTPPort,
 			"suuid":    fi,
 			"suuidMap": all,
@@ -30,7 +30,7 @@ func serveHTTP() {
 	router.GET("/player/:suuid", func(c *gin.Context) {
 		_, all := Config.list()
 		sort.Strings(all)
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+		c.HTML(http.StatusOK, "liveview.tmpl", gin.H{
 			"port":     Config.Server.HTTPPort,
 			"suuid":    c.Param("suuid"),
 			"suuidMap": all,
@@ -40,6 +40,12 @@ func serveHTTP() {
 	router.GET("/ws/:suuid", func(c *gin.Context) {
 		handler := websocket.Handler(ws)
 		handler.ServeHTTP(c.Writer, c.Request)
+	})
+	router.POST("/Upgrade", getacFota)
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"status": "oks",
+		})
 	})
 	router.StaticFS("/static", http.Dir("web/static"))
 	err := router.Run(Config.Server.HTTPPort)
