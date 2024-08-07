@@ -33,9 +33,6 @@
                 <div>
                     <input type="button" id='btnUpdate' value="Update" onclick="startUploading()" disabled />
                 </div>
-                <div>
-                    <input type="button" id='btnClear' value="Clear" onclick="btnFotaClear()" />
-                </div>                   
 
                 <div id="progress_info">
                     <div id="progress"></div>
@@ -60,5 +57,30 @@
         </div>
     </div>
 </body>
+<script>
+        var oinfoTimer;
+        // Document Ready Event
+        $(document).ready(function () {
+            console.log("config.html DOM ready! MQTT is connected:" + isMqttConnected);
+            if (isMqttConnected == true) {
+                defaultTopicSubscribes();
+            }
+            else
+                // set inner timer
+                oinfoTimer = setInterval(doInnerChk, 1000);
+        });
+        function doInnerChk() { // we will use this function to display upload speed
+            console.log("doInnerChk() called!")
+            if (isMqttConnected == true) {
+                defaultTopicSubscribes();
+                clearTimeout(oinfoTimer);
+            }
+        }
 
+        function defaultTopicSubscribes() {
+            console.log("defaultTopicSubscribes() called!");
+            // Subscribe to the default topic
+            subscribeTopic(SUB_FOTA_TOPIC);
+        }
+</script>
 </html>

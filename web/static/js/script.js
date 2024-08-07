@@ -69,13 +69,6 @@ function startUploading() {
     oTimer = setInterval(doInnerUpdates, 300);
 }
 
-function btnFotaClear() {    
-    console.log('btnFotaClear');
-    document.getElementById('progress_percent').innerHTML = '';
-    document.getElementById('b_transfered').innerHTML = '';
-    document.getElementById('progress_info').innerHTML = '';
-}
-
 function doInnerUpdates() { // we will use this function to display upload speed
     var iCB = iBytesUploaded;
     var iDiff = iCB - iPreviousBytesLoaded;
