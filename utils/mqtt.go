@@ -22,7 +22,7 @@ const (
 	MQTT_INTERNAL_TOPIC_REC_CA42A = "status/recording/ca42a"
 	MQTT_INTERNAL_TOPIC_INFO      = "info/#"
 	MQTT_EXTERNAL_BROKER_URI      = "tcp://127.0.0.1:1883"
-	MQTT_INTERNAL_BROKER_URI      = "tcp://127.0.0.1:8083"
+	MQTT_INTERNAL_BROKER_URI      = "tcp://127.0.0.1:1883"
 	MQTT_EXTERNAL_CLIENT_ID       = "MqttEx"
 	MQTT_INTERNAL_CLIENT_ID       = "MqttIn"
 )
