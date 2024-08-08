@@ -11,17 +11,19 @@
 
 <body id="info-page">
     <script>
-        var oinfoTimer;
+        //var oinfoTimer;
+        //oinfoTimer = setInterval(doInnerChk, 2000);
+        var oinfoTimer = setInterval(doInnerChk, 2000);
 
         function checkMqttAndSubscribe() {
             if (isMqttConnected) {
                 console.log('isMattConnected is true... subscribe to topic /info')
                 defaultTopicSubscribes();
-            } else {
+            } //else {
                 // set inner timer
-                console.log('isMattConnected is false... set inner timer');
-                oinfoTimer = setInterval(doInnerChk, 1000);
-            }
+                //console.log('isMattConnected is false... set inner timer');
+                //oinfoTimer = setInterval(doInnerChk, 2000);
+            //}
         }
 
         $(window).on('load', function () {
@@ -51,7 +53,7 @@
             console.log("defaultTopicSubscribes() called!");
             // Subscribe to the default topic
             subscribeTopic(SUB_INFO_TOPIC);
-            subscribeTopic(SUB_EVENTS_TOPIC);
+            //subscribeTopic(SUB_EVENTS_TOPIC);            
         }
     </script>
     <div class="card">

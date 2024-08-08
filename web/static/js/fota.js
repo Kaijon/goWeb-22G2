@@ -2,19 +2,23 @@
 //var SUB_FOTA_TOPIC = "fota/#";
 var SUB_FOTA_TOPIC = "status/fota/#";
 var SUB_FOTA_AREA = "progress_info";
-//var SUB_EVENTS_TOPIC = "status/io/sensorhub/events/#";
+var SUB_EVENTS_TOPIC = "fota/#";
 
 // called when a message arrives
 // 1.uboot 2.env 3.Image 4.dtb 4.rootfs 5.flash
 const topicHandlers_Fota = {
-    fota: handleFotaMessage,
+    fota: {
+        info: handleFotaMessage
+    },
     status: {
         fota: {
+            0: handleFota0Message,
             1: handleFota1Message,
             2: handleFota2Message,
-            3: handleFota1Message,
-            4: handleFota1Message,
-            5: handleFota1Message
+            3: handleFota3Message,
+            3: handleFota3Message,
+            4: handleFota4Message,
+            5: handleFota5Message
         }
     }
 };
@@ -59,7 +63,7 @@ function onMessageArrived_Fota(message) {
 //    cardBody.scrollTop = cardBody.scrollHeight;
 //}
 
-
+var formattedPayload = '';
 function handleFotaMessage(payload) {
     console.log('handleInfoMessage() called!');
     // check if the cardBody exists
@@ -68,7 +72,7 @@ function handleFotaMessage(payload) {
         console.log("cardBody not found");
         return;
     }
-    let formattedPayload = '';
+    //let formattedPayload = '';
     let parsedPayload;
     let fotaMessages = [];
 
@@ -83,21 +87,22 @@ function handleFotaMessage(payload) {
 
     fotaMessages.push(parsedPayload);
     fotaMessages.forEach((message, index) => {
-        formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
+        //formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
         
         // Create a map to store key-value pairs
         const messageMap = new Map(Object.entries(message));
 
         messageMap.forEach((value, key) => {
             switch (key) {
-                case 'stage':
-                    formattedPayload += `Stage: ${value}<br>`;
-                    break;
                 case 'percentage':
                     formattedPayload += `Percentage: ${value}%<br>`;
                     break;
                 case 'status':
-                    formattedPayload += `Status: ${value}<br>`;
+                    if (value === `success`) {
+                        formattedPayload += `<h4 style="color:#9900FF"><strong>FOTA Update Finish, Please reboot</strong></h4>`;
+                    } else {
+                        formattedPayload += `<h4 style="color:#F00000"><strong>FOTA Update Failure</strong></h4>`;
+                    }
                     break;
                 default:
                     formattedPayload += `${key}: ${value}<br>`;
@@ -105,7 +110,7 @@ function handleFotaMessage(payload) {
             }
         });
 
-        formattedPayload += '<br>';
+        //formattedPayload += '<br>';
     });
 
 
@@ -113,16 +118,63 @@ function handleFotaMessage(payload) {
     cardBody.scrollTop = cardBody.scrollHeight;
 }
 
+function handleFota0Message(payload) {
+    console.log('handleFota_0_Message() called!');
+    // check if the cardBody exists
+    const cardBody = document.getElementById(SUB_FOTA_AREA);
+    if (cardBody == null) {
+        console.log("cardBody not found");
+        return;
+    }
+
+    //let formattedPayload = '';
+    let parsedPayload;
+    let fotaMessages = [];
+
+    try {
+        parsedPayload = JSON.parse(payload);
+    } catch (error) {
+        console.log(`Fail to parse JSON text`);
+        cardBody.innerHTML = "Fail to parse JSON text";
+        cardBody.scrollTop = cardBody.scrollHeight;
+        return; 
+    }
+
+    fotaMessages.push(parsedPayload);
+    fotaMessages.forEach((message, index) => {
+        formattedPayload += `<strong>Message:</strong><br>`;
+        
+        // Create a map to store key-value pairs
+        const messageMap = new Map(Object.entries(message));
+
+        messageMap.forEach((value, key) => {
+            switch (key) {
+                case 'status':
+                    formattedPayload += `Extract Image, Status: ${value}<br>`;
+                    break;
+                default:
+                    formattedPayload += `${key}: ${value}<br>`;
+                    break;
+            }
+        });
+
+        //formattedPayload += '<br>';
+    });
+
+
+    cardBody.innerHTML = formattedPayload;
+    cardBody.scrollTop = cardBody.scrollHeight;
+}
 
 function handleFota1Message(payload) {
-    console.log('handleFota1Message() called!');
+    console.log('handleFota_1_Message() called!');
     // check if the cardBody exists
     const cardBody = document.getElementById(SUB_FOTA_AREA);
     if (cardBody == null) {
         console.log("cardBody not found");
         return;
     }
-    let formattedPayload = '';
+
     let parsedPayload;
     let fotaMessages = [];
 
@@ -137,7 +189,6 @@ function handleFota1Message(payload) {
 
     fotaMessages.push(parsedPayload);
     fotaMessages.forEach((message, index) => {
-        formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
         
         // Create a map to store key-value pairs
         const messageMap = new Map(Object.entries(message));
@@ -148,7 +199,8 @@ function handleFota1Message(payload) {
                     formattedPayload += `Percentage: ${value}%<br>`;
                     break;
                 case 'status':
-                    formattedPayload += `Status: ${value}<br>`;
+                    formattedPayload += `Part1, Status: ${value}<br>`;
+                    //progressMessage({ payloadString: '50' });
                     break;
                 default:
                     formattedPayload += `${key}: ${value}<br>`;
@@ -156,24 +208,23 @@ function handleFota1Message(payload) {
             }
         });
 
-        formattedPayload += '<br>';
+        //formattedPayload += '<br>';
     });
 
 
     cardBody.innerHTML = formattedPayload;
-    cardBody.scrollTop = cardBody.scrollHeight;
+    cardBody.scrollTop = cardBody.scrollHeight;    
 }
-
 
 function handleFota2Message(payload) {
-    console.log('handleFota2Message() called!');
+    console.log('handleFota_2_Message() called!');
     // check if the cardBody exists
     const cardBody = document.getElementById(SUB_FOTA_AREA);
     if (cardBody == null) {
         console.log("cardBody not found");
         return;
     }
-    let formattedPayload = '';
+
     let parsedPayload;
     let fotaMessages = [];
 
@@ -188,7 +239,7 @@ function handleFota2Message(payload) {
 
     fotaMessages.push(parsedPayload);
     fotaMessages.forEach((message, index) => {
-        formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
+        //formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
         
         // Create a map to store key-value pairs
         const messageMap = new Map(Object.entries(message));
@@ -199,7 +250,7 @@ function handleFota2Message(payload) {
                     formattedPayload += `Percentage: ${value}%<br>`;
                     break;
                 case 'status':
-                    formattedPayload += `Status: ${value}<br>`;
+                    formattedPayload += `Part2, Status: ${value}<br>`;
                     break;
                 default:
                     formattedPayload += `${key}: ${value}<br>`;
@@ -207,16 +258,169 @@ function handleFota2Message(payload) {
             }
         });
 
-        formattedPayload += '<br>';
+        //formattedPayload += '<br>';
     });
-
 
     cardBody.innerHTML = formattedPayload;
     cardBody.scrollTop = cardBody.scrollHeight;
 }
 
+var num = 0;
+function handleFota3Message(payload) {
+    console.log('handleFota_3_Message() called!');
+    // check if the cardBody exists
+    const cardBody = document.getElementById(SUB_FOTA_AREA);
+    if (cardBody == null) {
+        console.log("cardBody not found");
+        return;
+    }
 
+    let parsedPayload;
+    let fotaMessages = [];
 
+    try {
+        parsedPayload = JSON.parse(payload);
+    } catch (error) {
+        console.log(`Fail to parse JSON text`);
+        cardBody.innerHTML = "Fail to parse JSON text";
+        cardBody.scrollTop = cardBody.scrollHeight;
+        return; 
+    }
+
+    var term = '';
+    if (num===0) {
+        term = "Part3-a";
+    }
+    else {
+        term = "Part3-b";
+    }
+
+    fotaMessages.push(parsedPayload);
+    fotaMessages.forEach((message, index) => {
+        //formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
+        
+        // Create a map to store key-value pairs
+        const messageMap = new Map(Object.entries(message));
+
+        messageMap.forEach((value, key) => {
+            switch (key) {
+                case 'percentage':
+                    formattedPayload += `Percentage: ${value}%<br>`;
+                    break;
+                case 'status':
+                    formattedPayload += `${term}, Status: ${value}<br>`;
+                    num++;
+                    break;
+                default:
+                    formattedPayload += `${key}: ${value}<br>`;
+                    break;
+            }
+        });
+
+        //formattedPayload += '<br>';
+    });
+
+    cardBody.innerHTML = formattedPayload;
+    cardBody.scrollTop = cardBody.scrollHeight;
+}
+
+function handleFota4Message(payload) {
+    console.log('handleFota_4_Message() called!');
+    // check if the cardBody exists
+    const cardBody = document.getElementById(SUB_FOTA_AREA);
+    if (cardBody == null) {
+        console.log("cardBody not found");
+        return;
+    }
+
+    let parsedPayload;
+    let fotaMessages = [];
+
+    try {
+        parsedPayload = JSON.parse(payload);
+    } catch (error) {
+        console.log(`Fail to parse JSON text`);
+        cardBody.innerHTML = "Fail to parse JSON text";
+        cardBody.scrollTop = cardBody.scrollHeight;
+        return; 
+    }
+
+    fotaMessages.push(parsedPayload);
+    fotaMessages.forEach((message, index) => {
+        //formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
+        
+        // Create a map to store key-value pairs
+        const messageMap = new Map(Object.entries(message));
+
+        messageMap.forEach((value, key) => {
+            switch (key) {
+                case 'percentage':
+                    formattedPayload += `Percentage: ${value}%<br>`;
+                    break;
+                case 'status':
+                    formattedPayload += `Part4, Status: ${value}<br>`;
+                    break;
+                default:
+                    formattedPayload += `${key}: ${value}<br>`;
+                    break;
+            }
+        });
+
+        //formattedPayload += '<br>';
+    });
+
+    cardBody.innerHTML = formattedPayload;
+    cardBody.scrollTop = cardBody.scrollHeight;
+}
+
+function handleFota5Message(payload) {
+    console.log('handleFota_5_Message() called!');
+    // check if the cardBody exists
+    const cardBody = document.getElementById(SUB_FOTA_AREA);
+    if (cardBody == null) {
+        console.log("cardBody not found");
+        return;
+    }
+
+    let parsedPayload;
+    let fotaMessages = [];
+
+    try {
+        parsedPayload = JSON.parse(payload);
+    } catch (error) {
+        console.log(`Fail to parse JSON text`);
+        cardBody.innerHTML = "Fail to parse JSON text";
+        cardBody.scrollTop = cardBody.scrollHeight;
+        return; 
+    }
+
+    fotaMessages.push(parsedPayload);
+    fotaMessages.forEach((message, index) => {
+        //formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
+        
+        // Create a map to store key-value pairs
+        const messageMap = new Map(Object.entries(message));
+
+        messageMap.forEach((value, key) => {
+            switch (key) {
+                case 'percentage':
+                    formattedPayload += `Percentage: ${value}%<br>`;
+                    break;
+                case 'status':
+                    formattedPayload += `Part5, Status: ${value}<br>`;
+                    break;
+                default:
+                    formattedPayload += `${key}: ${value}<br>`;
+                    break;
+            }
+        });
+
+        //formattedPayload += '<br>';
+    });
+
+    cardBody.innerHTML = formattedPayload;
+    cardBody.scrollTop = cardBody.scrollHeight;
+}
 
 
 

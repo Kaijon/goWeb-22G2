@@ -158,6 +158,11 @@ function gen_MQTT_Client_ID() {
 }
 
 var topicHandlers = {
+    'fota': {
+        'info/#': {
+            handler: [onMessageArrived_Fota],
+        },
+    },
     'info': {
         handler: [onMessageArrived_Info],
     },
@@ -196,11 +201,6 @@ var topicHandlers = {
     'factory': {
         'info/#': {
             handler: [onMessageArrived_Factory],
-        },
-    },
-    'fota': {
-        'info': {
-            handler: [onMessageArrived_Fota],
         },
     },
 };
