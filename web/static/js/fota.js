@@ -485,7 +485,7 @@ function handleFota6Message(payload) {
                     formattedPayload += `Percentage: ${value}%<br>`;
                     break;
                 case 'status':
-                    formattedPayload += `Part5, Status: ${value}<br>`;
+                    formattedPayload += `Part6, Status: ${value}<br>`;
                     progress.click();
                     break;
                 default:

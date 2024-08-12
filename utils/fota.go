@@ -268,7 +268,7 @@ func FotaFlash() error {
 		log.Printf("File %s exists.\n", flashBinary)
 	}
 
-	cmd1 := exec.Command("tar", "-xvf", "webBinary", "-C", flashPath)
+	cmd1 := exec.Command("tar", "-xvf", flashBinary, "-C", flashPath)
 	cmd1.Env = os.Environ()
 	cmd1.Stdout = os.Stdout
 	cmd1.Stderr = os.Stderr
