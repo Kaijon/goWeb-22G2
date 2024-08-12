@@ -41,6 +41,7 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/0", "{\"status\":\"success\"}")
 	}
 
+	log.Println("========== Run FotaUboot ==========")
 	err = FotaUboot()
 	if err != nil {
 		if err.Error() == "File not found" {
@@ -53,6 +54,7 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/1", "{\"status\":\"success\"}")
 	}
 
+	log.Println("========== Run FotaUbootEnv ==========")
 	err = FotaUbootEnv()
 	if err != nil {
 		if err.Error() == "File not found" {
@@ -65,37 +67,39 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/2", "{\"status\":\"success\"}")
 	}
 
-	err = FotaImageHook()
-	if err != nil {
-		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"failed\"}")
-		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"failed\"}")
-		isPass = false
-	} else {
-		err = FotaKernel()
-		if err != nil {
-			if err.Error() == "File not found" {
-				MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"skip\"}")
-			} else {
-				MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"failed\"}")
-				isPass = false
-			}
-		} else {
-			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"success\"}")
-		}
+	log.Println("========== Run FotaImagePreHook ==========")
+	FotaImagePreHook()
 
-		err = FotaDtb()
-		if err != nil {
-			if err.Error() == "File not found" {
-				MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"skip\"}")
-			} else {
-				MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"failed\"}")
-				isPass = false
-			}
+	log.Println("========== Run FotaKernel ==========")
+	err = FotaKernel()
+	if err != nil {
+		if err.Error() == "File not found" {
+			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"skip\"}")
 		} else {
-			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"success\"}")
+			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"failed\"}")
+			isPass = false
 		}
+	} else {
+		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"success\"}")
 	}
 
+	log.Println("========== Run FotaDtb ==========")
+	err = FotaDtb()
+	if err != nil {
+		if err.Error() == "File not found" {
+			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"skip\"}")
+		} else {
+			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"failed\"}")
+			isPass = false
+		}
+	} else {
+		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"success\"}")
+	}
+
+	log.Println("========== Run FotaImagePostHook ==========")
+	FotaImagePostHook()
+
+	log.Println("========== Run FotaRootFs ==========")
 	err = FotaRootFs()
 	if err != nil {
 		if err.Error() == "File not found" {
@@ -105,20 +109,36 @@ func fota() {
 			isPass = false
 		}
 	} else {
-		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/4", "{\"status\":\"success\", \"percentage\":\"123\"}")
+		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/4", "{\"status\":\"success\"}")
 	}
 
-	err = FotaStorage()
+	log.Println("========== Run FotaWeb ==========")
+	err = FotaWeb()
 	if err != nil {
 		if err.Error() == "File not found" {
 			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/5", "{\"status\":\"skip\"}")
 		} else {
 			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/5", "{\"status\":\"failed\"}")
+			isPass = false
 		}
 	} else {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/5", "{\"status\":\"success\"}")
 	}
 
+	log.Println("========== Run FotaFlash ==========")
+	err = FotaFlash()
+	if err != nil {
+		if err.Error() == "File not found" {
+			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/6", "{\"status\":\"skip\"}")
+		} else {
+			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/6", "{\"status\":\"failed\"}")
+			isPass = false
+		}
+	} else {
+		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/6", "{\"status\":\"success\"}")
+	}
+
+	log.Println("========== Update FOTA Status ==========")
 	if isPass == true {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "fota/info", "{\"status\":\"success\"}")
 	} else {

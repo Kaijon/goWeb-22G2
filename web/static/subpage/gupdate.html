@@ -26,7 +26,7 @@
                         <div><label for="image_file">Please select firmware image</label></div>
                     </h2>
                     <div>
-                        <input type="file" name="image_file" id="image_file" accept=".tar"
+                        <input type="file" name="image_file" id="image_file" accept=".img"
                             onchange="document.getElementById('btnUpdate').disabled = false;" />
                     </div>
                 </div>
@@ -55,9 +55,12 @@
             </div>
             <img id="preview" />
             <div class="progress">
-                <div id="part1" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-                <div class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
-                <div class="progress-bar bg-info" role="progressbar" style="width: 0%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                <div id="part1" class="progress-bar progress-bar-striped"               role="progressbar" style="width: 0%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                <div id="part2" class="progress-bar progress-bar-striped bg-secondary"  role="progressbar" style="width: 0%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                <div id="part3" class="progress-bar progress-bar-striped bg-success"    role="progressbar" style="width: 0%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                <div id="part4" class="progress-bar progress-bar-striped bg-info"       role="progressbar" style="width: 0%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                <div id="part5" class="progress-bar progress-bar-striped bg-warning"    role="progressbar" style="width: 0%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                <div id="part6" class="progress-bar progress-bar-striped bg-danger"     role="progressbar" style="width: 0%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
             </div>            
         </div>
     </div>
@@ -73,24 +76,74 @@
             //else
                 // set inner timer
                 //oinfoTimer = setInterval(doInnerChk, 1000);
-                const progress = document.getElementById('part1');
-            
-            function updateProgressBar(value) {
-                progress.style.width = value + '%';
-                progress.setAttribute('aria-valuenow', value); // Optionally update the aria-valuenow attribute
-            }
+            const progress1 = document.getElementById('part1');
+            const progress2 = document.getElementById('part2');
+            const progress3 = document.getElementById('part3');
+            const progress4 = document.getElementById('part4');
+            const progress5 = document.getElementById('part5');
+            const progress6 = document.getElementById('part6');
+            progress1.addEventListener('click', click_progress1);
+            progress2.addEventListener('click', click_progress2);
+            progress3.addEventListener('click', click_progress3);
+            progress4.addEventListener('click', click_progress4);
+            progress5.addEventListener('click', click_progress5);
+            progress6.addEventListener('click', click_progress6);
 
-            function progressMessage(message) {
+            function click_progress1() {
                 try {
-                    console.log("handleFota1Message called!");
-                    // Example logic to update the progress bar
-                    let progressValue = parseInt(message.payloadString);
-                    updateProgressBar(progressValue);
+                    console.log("click_progress1 called!");
+                    progress1.style.width = 7 + '%';
+                    progress1.setAttribute('aria-valuenow', 7); // Optionally update the aria-valuenow attribute
                 } catch (error) {
                     console.error("Error in handleFota1Message: ", error);
                 }
             }
 
+            function click_progress2() {
+                try {
+                    console.log("click_progress2 called!");
+                    progress2.style.width = 3 + '%';
+                    progress2.setAttribute('aria-valuenow', 3); // Optionally update the aria-valuenow attribute
+                } catch (error) {
+                    console.error("Error in handleFota2Message: ", error);
+                }
+            }
+            function click_progress3() {
+                try {
+                    console.log("click_progress3 called!");
+                    progress3.style.width = 15 + '%';
+                    progress3.setAttribute('aria-valuenow', 15); // Optionally update the aria-valuenow attribute
+                } catch (error) {
+                    console.error("Error in handleFota3Message: ", error);
+                }
+            }
+            function click_progress4() {
+                try {
+                    console.log("click_progress4 called!");
+                    progress4.style.width = 50 + '%';
+                    progress4.setAttribute('aria-valuenow', 50); // Optionally update the aria-valuenow attribute
+                } catch (error) {
+                    console.error("Error in handleFota4Message: ", error);
+                }
+            }
+            function click_progress5() {
+                try {
+                    console.log("click_progress5 called!");
+                    progress5.style.width = 10 + '%';
+                    progress5.setAttribute('aria-valuenow', 10); // Optionally update the aria-valuenow attribute
+                } catch (error) {
+                    console.error("Error in handleFota4Message: ", error);
+                }
+            }
+            function click_progress6() {
+                try {
+                    console.log("click_progress6 called!");
+                    progress6.style.width = 15 + '%';
+                    progress6.setAttribute('aria-valuenow', 15); // Optionally update the aria-valuenow attribute
+                } catch (error) {
+                    console.error("Error in handleFota6Message: ", error);
+                }
+            }
             // Simulate receiving a message from MQTT (for debugging purposes)
             // In your real implementation, this will be triggered by your MQTT message handling logic
             //progressMessage({ payloadString: '50' }); // Example payload to set progress to 50%

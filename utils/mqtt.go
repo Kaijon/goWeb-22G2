@@ -43,7 +43,7 @@ func (m *Client) Publish(clientId, topic, data string) {
 		log.Printf("%s->%s(VHA-10)", MQTT_EXTERNAL_CLIENT_ID, data)
 		m.exClient.Publish(topic, 0, false, data)
 	} else if clientId == MQTT_INTERNAL_CLIENT_ID {
-		log.Printf("%s->%s(LOCAL)", MQTT_INTERNAL_CLIENT_ID, data)
+		log.Printf("%s->%s", MQTT_INTERNAL_CLIENT_ID, data)
 		m.inClient.Publish(topic, 0, false, data)
 	} else {
 		log.Println("Not identify Mqtt client")

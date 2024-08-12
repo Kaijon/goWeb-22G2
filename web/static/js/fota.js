@@ -5,7 +5,6 @@ var SUB_FOTA_AREA = "progress_info";
 var SUB_EVENTS_TOPIC = "fota/#";
 
 // called when a message arrives
-// 1.uboot 2.env 3.Image 4.dtb 4.rootfs 5.flash
 const topicHandlers_Fota = {
     fota: {
         info: handleFotaMessage
@@ -18,7 +17,8 @@ const topicHandlers_Fota = {
             3: handleFota3Message,
             3: handleFota3Message,
             4: handleFota4Message,
-            5: handleFota5Message
+            5: handleFota5Message,
+            6: handleFota6Message
         }
     }
 };
@@ -99,7 +99,7 @@ function handleFotaMessage(payload) {
                     break;
                 case 'status':
                     if (value === `success`) {
-                        formattedPayload += `<h4 style="color:#9900FF"><strong>FOTA Update Finish, Please reboot</strong></h4>`;
+                        formattedPayload += `<h4 style="color:#9900FF"><strong>FOTA Update Finish, Please Reboot</strong></h4>`;
                     } else {
                         formattedPayload += `<h4 style="color:#F00000"><strong>FOTA Update Failure</strong></h4>`;
                     }
@@ -170,11 +170,14 @@ function handleFota1Message(payload) {
     console.log('handleFota_1_Message() called!');
     // check if the cardBody exists
     const cardBody = document.getElementById(SUB_FOTA_AREA);
+    const progress = document.getElementById('part1');
     if (cardBody == null) {
         console.log("cardBody not found");
         return;
     }
-
+    if (progress == null) {
+        console.log("progress not found");
+    }
     let parsedPayload;
     let fotaMessages = [];
 
@@ -201,6 +204,7 @@ function handleFota1Message(payload) {
                 case 'status':
                     formattedPayload += `Part1, Status: ${value}<br>`;
                     //progressMessage({ payloadString: '50' });
+                    progress.click();
                     break;
                 default:
                     formattedPayload += `${key}: ${value}<br>`;
@@ -220,11 +224,14 @@ function handleFota2Message(payload) {
     console.log('handleFota_2_Message() called!');
     // check if the cardBody exists
     const cardBody = document.getElementById(SUB_FOTA_AREA);
+    const progress = document.getElementById('part2');
     if (cardBody == null) {
         console.log("cardBody not found");
         return;
     }
-
+    if (progress == null) {
+        console.log("progress not found");
+    }
     let parsedPayload;
     let fotaMessages = [];
 
@@ -251,6 +258,7 @@ function handleFota2Message(payload) {
                     break;
                 case 'status':
                     formattedPayload += `Part2, Status: ${value}<br>`;
+                    progress.click();
                     break;
                 default:
                     formattedPayload += `${key}: ${value}<br>`;
@@ -270,9 +278,13 @@ function handleFota3Message(payload) {
     console.log('handleFota_3_Message() called!');
     // check if the cardBody exists
     const cardBody = document.getElementById(SUB_FOTA_AREA);
+    const progress = document.getElementById('part3');
     if (cardBody == null) {
         console.log("cardBody not found");
         return;
+    }
+    if (progress == null) {
+        console.log("progress not found");
     }
 
     let parsedPayload;
@@ -310,6 +322,9 @@ function handleFota3Message(payload) {
                 case 'status':
                     formattedPayload += `${term}, Status: ${value}<br>`;
                     num++;
+                    if (num === 2) {
+                        progress.click(); 
+                    }
                     break;
                 default:
                     formattedPayload += `${key}: ${value}<br>`;
@@ -328,9 +343,13 @@ function handleFota4Message(payload) {
     console.log('handleFota_4_Message() called!');
     // check if the cardBody exists
     const cardBody = document.getElementById(SUB_FOTA_AREA);
+    const progress = document.getElementById('part4');
     if (cardBody == null) {
         console.log("cardBody not found");
         return;
+    }
+    if (progress == null) {
+        console.log("progress not found");
     }
 
     let parsedPayload;
@@ -359,6 +378,7 @@ function handleFota4Message(payload) {
                     break;
                 case 'status':
                     formattedPayload += `Part4, Status: ${value}<br>`;
+                    progress.click();
                     break;
                 default:
                     formattedPayload += `${key}: ${value}<br>`;
@@ -377,9 +397,13 @@ function handleFota5Message(payload) {
     console.log('handleFota_5_Message() called!');
     // check if the cardBody exists
     const cardBody = document.getElementById(SUB_FOTA_AREA);
+    const progress = document.getElementById('part5');
     if (cardBody == null) {
         console.log("cardBody not found");
         return;
+    }
+    if (progress == null) {
+        console.log("progress not found");
     }
 
     let parsedPayload;
@@ -408,6 +432,61 @@ function handleFota5Message(payload) {
                     break;
                 case 'status':
                     formattedPayload += `Part5, Status: ${value}<br>`;
+                    progress.click();
+                    break;
+                default:
+                    formattedPayload += `${key}: ${value}<br>`;
+                    break;
+            }
+        });
+
+        //formattedPayload += '<br>';
+    });
+
+    cardBody.innerHTML = formattedPayload;
+    cardBody.scrollTop = cardBody.scrollHeight;
+}
+
+function handleFota6Message(payload) {
+    console.log('handleFota_6_Message() called!');
+    // check if the cardBody exists
+    const cardBody = document.getElementById(SUB_FOTA_AREA);
+    const progress = document.getElementById('part6');
+    if (cardBody == null) {
+        console.log("cardBody not found");
+        return;
+    }
+    if (progress == null) {
+        console.log("progress not found");
+    }
+
+    let parsedPayload;
+    let fotaMessages = [];
+
+    try {
+        parsedPayload = JSON.parse(payload);
+    } catch (error) {
+        console.log(`Fail to parse JSON text`);
+        cardBody.innerHTML = "Fail to parse JSON text";
+        cardBody.scrollTop = cardBody.scrollHeight;
+        return; 
+    }
+
+    fotaMessages.push(parsedPayload);
+    fotaMessages.forEach((message, index) => {
+        //formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
+        
+        // Create a map to store key-value pairs
+        const messageMap = new Map(Object.entries(message));
+
+        messageMap.forEach((value, key) => {
+            switch (key) {
+                case 'percentage':
+                    formattedPayload += `Percentage: ${value}%<br>`;
+                    break;
+                case 'status':
+                    formattedPayload += `Part5, Status: ${value}<br>`;
+                    progress.click();
                     break;
                 default:
                     formattedPayload += `${key}: ${value}<br>`;
