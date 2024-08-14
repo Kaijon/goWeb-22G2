@@ -4,6 +4,8 @@ import (
 	. "getac/goWeb/utils"
 	"log"
 	"net/http"
+	"os"
+	"os/exec"
 
 	"github.com/gin-gonic/gin"
 )
@@ -143,5 +145,12 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "fota/info", "{\"status\":\"success\"}")
 	} else {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "fota/info", "{\"status\":\"failed\"}")
+	}
+
+	cmd := exec.Command("rm", "-rf", "/tmp/fota")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Printf("remove /tmp/fota: %v", err)
 	}
 }
