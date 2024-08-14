@@ -143,14 +143,19 @@ func fota() {
 	log.Println("========== Update FOTA Status ==========")
 	if isPass == true {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "fota/info", "{\"status\":\"success\"}")
+		cmd := exec.Command("rm", "-rf", "/tmp/fota")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			log.Printf("remove /tmp/fota: %v", err)
+		}
+		cmd = exec.Command("rm", "-rf", "/tmp/fota.img")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			log.Printf("remove /tmp/fota.img: %v", err)
+		}
 	} else {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "fota/info", "{\"status\":\"failed\"}")
-	}
-
-	cmd := exec.Command("rm", "-rf", "/tmp/fota")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Printf("remove /tmp/fota: %v", err)
 	}
 }
