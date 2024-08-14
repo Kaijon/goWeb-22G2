@@ -26,9 +26,9 @@ const (
 	rootfsBinary    = "/tmp/fota/rootfs.ext2"
 	rootfsPartition = "/dev/mmcblk0p6"
 	rootfsCount     = 262134
-	//web
-	webBinary = "/tmp/fota/web.tar"
-	webPath   = "/mnt/flash"
+	//daemon
+	daemonBinary = "/tmp/fota/daemon.tar"
+	daemonPath   = "/mnt/flash"
 	//flash
 	flashBinary = "/tmp/fota/flash.tar"
 	flashPath   = "/mnt/flash"
@@ -240,14 +240,14 @@ func FotaRootFs() error {
 }
 
 func FotaWeb() error {
-	if _, err := os.Stat(webBinary); os.IsNotExist(err) {
-		log.Printf("File %s does not exist.\n", webBinary)
+	if _, err := os.Stat(daemonBinary); os.IsNotExist(err) {
+		log.Printf("File %s does not exist.\n", daemonBinary)
 		return fmt.Errorf("File not found")
 	} else {
-		log.Printf("File %s exists.\n", webBinary)
+		log.Printf("File %s exists.\n", daemonBinary)
 	}
 
-	cmd1 := exec.Command("tar", "-xvf", webBinary, "-C", webPath)
+	cmd1 := exec.Command("tar", "-xvf", daemonBinary, "-C", daemonPath)
 	cmd1.Env = os.Environ()
 	cmd1.Stdout = os.Stdout
 	cmd1.Stderr = os.Stderr
