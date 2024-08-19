@@ -69,21 +69,8 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/2", "{\"status\":\"success\"}")
 	}
 
-	log.Println("========== Run FotaImagePreHook ==========")
-	FotaImagePreHook()
-
-	log.Println("========== Run FotaKernel ==========")
-	err = FotaKernel()
-	if err != nil {
-		if err.Error() == "File not found" {
-			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"skip\"}")
-		} else {
-			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"failed\"}")
-			isPass = false
-		}
-	} else {
-		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"success\"}")
-	}
+	//log.Println("========== Run FotaImagePreHook ==========")
+	//FotaImagePreHook()
 
 	log.Println("========== Run FotaDtb ==========")
 	err = FotaDtb()
@@ -98,11 +85,8 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/3", "{\"status\":\"success\"}")
 	}
 
-	log.Println("========== Run FotaImagePostHook ==========")
-	FotaImagePostHook()
-
-	log.Println("========== Run FotaRootFs ==========")
-	err = FotaRootFs()
+	log.Println("========== Run FotaKernel ==========")
+	err = FotaKernel()
 	if err != nil {
 		if err.Error() == "File not found" {
 			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/4", "{\"status\":\"skip\"}")
@@ -114,8 +98,11 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/4", "{\"status\":\"success\"}")
 	}
 
-	log.Println("========== Run FotaWeb ==========")
-	err = FotaWeb()
+	//log.Println("========== Run FotaImagePostHook ==========")
+	//FotaImagePostHook()
+
+	log.Println("========== Run FotaRootFs ==========")
+	err = FotaRootFs()
 	if err != nil {
 		if err.Error() == "File not found" {
 			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/5", "{\"status\":\"skip\"}")
@@ -127,8 +114,8 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/5", "{\"status\":\"success\"}")
 	}
 
-	log.Println("========== Run FotaFlash ==========")
-	err = FotaFlash()
+	log.Println("========== Run FotaWeb ==========")
+	err = FotaDaemon()
 	if err != nil {
 		if err.Error() == "File not found" {
 			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/6", "{\"status\":\"skip\"}")
@@ -138,6 +125,19 @@ func fota() {
 		}
 	} else {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/6", "{\"status\":\"success\"}")
+	}
+
+	log.Println("========== Run FotaFlash ==========")
+	err = FotaFlash()
+	if err != nil {
+		if err.Error() == "File not found" {
+			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/7", "{\"status\":\"skip\"}")
+		} else {
+			MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/7", "{\"status\":\"failed\"}")
+			isPass = false
+		}
+	} else {
+		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/7", "{\"status\":\"success\"}")
 	}
 
 	log.Println("========== Update FOTA Status ==========")

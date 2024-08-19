@@ -18,17 +18,21 @@ const (
 	ubootEnvBinary    = "/tmp/fota/u-boot_env.bin"
 	ubootEnvPartition = "/dev/mmcblk0p4"
 	ubootEnvCount     = 2047
-	//Kernel & dtb
+	//dtb
+	dtbBinary    = "/tmp/fota/leipzig.dtb"
+	dtbPartition = "/dev/mmcblk0p5"
+	dtbCount     = 2047
+	//Kernel
 	kernelBinary    = "/tmp/fota/Image"
-	dtbBinary       = "/tmp/fota/leipzig.dtb"
-	kernelPartition = "/dev/mmcblk0p5"
+	kernelPartition = "/dev/mmcblk0p6"
+	kernelCount     = 40959
 	//rootfs
 	rootfsBinary    = "/tmp/fota/rootfs.ext2"
-	rootfsPartition = "/dev/mmcblk0p6"
+	rootfsPartition = "/dev/mmcblk0p7"
 	rootfsCount     = 262134
 	//daemon
 	daemonBinary = "/tmp/fota/daemon.tar"
-	daemonPath   = "/mnt/flash"
+	daemonPath   = "/mnt/getac"
 	//flash
 	flashBinary = "/tmp/fota/flash.tar"
 	flashPath   = "/mnt/flash"
@@ -156,24 +160,48 @@ func FotaKernel() error {
 		log.Printf("File %s exists.\n", kernelBinary)
 	}
 
-	// Remove /tmp/partition5/Image
-	filesToRemove := []string{"/tmp/partition5/Image"}
-	for _, file := range filesToRemove {
-		if err := os.Remove(file); err != nil {
-			log.Printf("Error removing %s: %v", file, err)
-		} else {
-			log.Printf("Removed %s successfully", file)
-		}
+	cmd1 := exec.Command("dd", "if=/dev/zero", "of="+kernelPartition, "bs=512", "count="+strconv.Itoa(kernelCount))
+	//cmd1 := exec.Command("echo", "erase kernel")
+	cmd1.Env = os.Environ()
+	cmd1.Stdout = os.Stdout
+	cmd1.Stderr = os.Stderr
+	err := cmd1.Run()
+	if err != nil {
+		log.Printf("Error running erase command: %v", err)
+		return fmt.Errorf("error running erase command: %w", err)
 	}
 
-	cmd := exec.Command("cp", "/tmp/fota/Image", "/tmp/partition5/")
-	//cmd := exec.Command("echo", "flash Kernel")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Printf("Error copying /tmp/Image: %v", err)
-		return fmt.Errorf("Error copying /tmp/fota/Image: %v", err)
+	cmd2 := exec.Command("dd", "if="+kernelBinary, "of="+kernelPartition)
+	//cmd2 := exec.Command("echo", "flash kernel")
+	cmd2.Env = os.Environ()
+	cmd2.Stdout = os.Stdout
+	cmd2.Stderr = os.Stderr
+	err = cmd2.Run()
+	if err != nil {
+		log.Printf("Error running erase command: %v", err)
+		return fmt.Errorf("error running second command: %w", err)
 	}
+
+	/*
+		// Remove /tmp/partition5/Image
+		filesToRemove := []string{"/tmp/partition5/Image"}
+		for _, file := range filesToRemove {
+			if err := os.Remove(file); err != nil {
+				log.Printf("Error removing %s: %v", file, err)
+			} else {
+				log.Printf("Removed %s successfully", file)
+			}
+		}
+
+		cmd := exec.Command("cp", "/tmp/fota/Image", "/tmp/partition5/")
+		//cmd := exec.Command("echo", "flash Kernel")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			log.Printf("Error copying /tmp/Image: %v", err)
+			return fmt.Errorf("Error copying /tmp/fota/Image: %v", err)
+		}
+	*/
 
 	return nil
 }
@@ -186,24 +214,48 @@ func FotaDtb() error {
 		log.Printf("File %s exists.\n", dtbBinary)
 	}
 
-	// Remove /tmp/partition5/Image
-	filesToRemove := []string{"/tmp/partition5/leipzig.dtb"}
-	for _, file := range filesToRemove {
-		if err := os.Remove(file); err != nil {
-			log.Printf("Error removing %s: %v", file, err)
-		} else {
-			log.Printf("Removed %s successfully", file)
-		}
+	cmd1 := exec.Command("dd", "if=/dev/zero", "of="+dtbPartition, "bs=512", "count="+strconv.Itoa(dtbCount))
+	//cmd1 := exec.Command("echo", "erase ubootenv")
+	cmd1.Env = os.Environ()
+	cmd1.Stdout = os.Stdout
+	cmd1.Stderr = os.Stderr
+	err := cmd1.Run()
+	if err != nil {
+		log.Printf("Error running erase command: %v", err)
+		return fmt.Errorf("error running erase command: %w", err)
 	}
 
-	cmd := exec.Command("cp", "/tmp/fota/leipzig.dtb", "/tmp/partition5/")
-	//cmd := exec.Command("echo", "flash dtb")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Printf("Error copying /tmp/leipzig.dtb: %v", err)
-		return fmt.Errorf("Error copying /tmp/fota/leipzig.dtb: %v", err)
+	cmd2 := exec.Command("dd", "if="+dtbBinary, "of="+dtbPartition)
+	//cmd2 := exec.Command("echo", "flash ubootenv")
+	cmd2.Env = os.Environ()
+	cmd2.Stdout = os.Stdout
+	cmd2.Stderr = os.Stderr
+	err = cmd2.Run()
+	if err != nil {
+		log.Printf("Error running flash command: %v", err)
+		return fmt.Errorf("error running flash command: %w", err)
 	}
+
+	/*
+		// Remove /tmp/partition5/Image
+		filesToRemove := []string{"/tmp/partition5/leipzig.dtb"}
+		for _, file := range filesToRemove {
+			if err := os.Remove(file); err != nil {
+				log.Printf("Error removing %s: %v", file, err)
+			} else {
+				log.Printf("Removed %s successfully", file)
+			}
+		}
+
+		cmd := exec.Command("cp", "/tmp/fota/leipzig.dtb", "/tmp/partition5/")
+		//cmd := exec.Command("echo", "flash dtb")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			log.Printf("Error copying /tmp/leipzig.dtb: %v", err)
+			return fmt.Errorf("Error copying /tmp/fota/leipzig.dtb: %v", err)
+		}
+	*/
 	return nil
 }
 
@@ -239,7 +291,7 @@ func FotaRootFs() error {
 	return nil
 }
 
-func FotaWeb() error {
+func FotaDaemon() error {
 	if _, err := os.Stat(daemonBinary); os.IsNotExist(err) {
 		log.Printf("File %s does not exist.\n", daemonBinary)
 		return fmt.Errorf("File not found")
