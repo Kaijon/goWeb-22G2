@@ -18,7 +18,8 @@ const topicHandlers_Fota = {
             3: handleFota3Message,
             4: handleFota4Message,
             5: handleFota5Message,
-            6: handleFota6Message
+            6: handleFota6Message,
+            7: handleFota7Message
         }
     }
 };
@@ -306,6 +307,7 @@ function handleFota3Message(payload) {
     else {
         term = "Part3-b";
     }
+    term = "Part3";
 
     fotaMessages.push(parsedPayload);
     fotaMessages.forEach((message, index) => {
@@ -322,9 +324,9 @@ function handleFota3Message(payload) {
                 case 'status':
                     formattedPayload += `${term}, Status: ${value}<br>`;
                     num++;
-                    if (num === 2) {
+                    //if (num === 2) {
                         progress.click(); 
-                    }
+                    //}
                     break;
                 default:
                     formattedPayload += `${key}: ${value}<br>`;
@@ -501,12 +503,59 @@ function handleFota6Message(payload) {
     cardBody.scrollTop = cardBody.scrollHeight;
 }
 
+function handleFota7Message(payload) {
+    console.log('handleFota_7_Message() called!');
+    // check if the cardBody exists
+    const cardBody = document.getElementById(SUB_FOTA_AREA);
+    const progress = document.getElementById('part7');
+    if (cardBody == null) {
+        console.log("cardBody not found");
+        return;
+    }
+    if (progress == null) {
+        console.log("progress not found");
+    }
 
+    let parsedPayload;
+    let fotaMessages = [];
 
+    try {
+        parsedPayload = JSON.parse(payload);
+    } catch (error) {
+        console.log(`Fail to parse JSON text`);
+        cardBody.innerHTML = "Fail to parse JSON text";
+        cardBody.scrollTop = cardBody.scrollHeight;
+        return; 
+    }
 
+    fotaMessages.push(parsedPayload);
+    fotaMessages.forEach((message, index) => {
+        //formattedPayload += `<strong>Message ${index + 1}:</strong><br>`;
+        
+        // Create a map to store key-value pairs
+        const messageMap = new Map(Object.entries(message));
 
+        messageMap.forEach((value, key) => {
+            switch (key) {
+                case 'percentage':
+                    formattedPayload += `Percentage: ${value}%<br>`;
+                    break;
+                case 'status':
+                    formattedPayload += `Part7, Status: ${value}<br>`;
+                    progress.click();
+                    break;
+                default:
+                    formattedPayload += `${key}: ${value}<br>`;
+                    break;
+            }
+        });
 
+        //formattedPayload += '<br>';
+    });
 
+    cardBody.innerHTML = formattedPayload;
+    cardBody.scrollTop = cardBody.scrollHeight;
+}
 
 
 
