@@ -38,6 +38,7 @@ function bytesToSize(bytes) {
 
 
 function startUploading() {
+    document.getElementById('btnUpdate').disabled = true;
     // hide all links except FOTA page, refresh will show all links
     document.getElementById('home-link').style.display = 'none';
     document.getElementById('connections-link').style.display = 'none';
