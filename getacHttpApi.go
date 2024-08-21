@@ -43,6 +43,9 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/0", "{\"status\":\"success\"}")
 	}
 
+	log.Println("========== Run prehookInstall ==========")
+	_ = PrehookInstall()
+
 	log.Println("========== Run FotaUboot ==========")
 	err = FotaUboot()
 	if err != nil {
@@ -114,7 +117,7 @@ func fota() {
 		MqttClient.Publish(MQTT_INTERNAL_CLIENT_ID, "status/fota/5", "{\"status\":\"success\"}")
 	}
 
-	log.Println("========== Run FotaWeb ==========")
+	log.Println("========== Run FotaDaemon ==========")
 	err = FotaDaemon()
 	if err != nil {
 		if err.Error() == "File not found" {

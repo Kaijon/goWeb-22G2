@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 )
 
@@ -39,6 +40,19 @@ const (
 
 	tmpFotaFolder = "/tmp/fota"
 )
+
+func PrehookInstall() error {
+	cmd := exec.Command("./web/sh/prehookInstall.sh")
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("Error running PrehookInstall: %v", err)
+		return fmt.Errorf("Error running PrehookInstall: %v", err)
+	}
+	return nil
+}
 
 func FotaExtractFile() error {
 	if _, err := os.Stat(fotaImage); os.IsNotExist(err) {
@@ -267,23 +281,23 @@ func FotaRootFs() error {
 		log.Printf("File %s exists.\n", rootfsBinary)
 	}
 
-	cmd1 := exec.Command("dd", "if=/dev/zero", "of="+rootfsPartition, "bs=512", "count="+strconv.Itoa(rootfsCount))
+	//cmd1 := exec.Command("dd", "if=/dev/zero", "of="+rootfsPartition, "bs=512", "count="+strconv.Itoa(rootfsCount))
 	//cmd1 := exec.Command("echo", "erase rootfs")
-	cmd1.Env = os.Environ()
-	cmd1.Stdout = os.Stdout
-	cmd1.Stderr = os.Stderr
-	err := cmd1.Run()
-	if err != nil {
-		log.Printf("Error running erase command: %v", err)
-		return fmt.Errorf("error running erase command: %w", err)
-	}
+	//cmd1.Env = os.Environ()
+	//cmd1.Stdout = os.Stdout
+	//cmd1.Stderr = os.Stderr
+	//err := cmd1.Run()
+	//if err != nil {
+	//	log.Printf("Error running erase command: %v", err)
+	//	return fmt.Errorf("error running erase command: %w", err)
+	//}
 
 	cmd2 := exec.Command("dd", "if="+rootfsBinary, "of="+rootfsPartition)
 	//cmd2 := exec.Command("echo", "flash rootfs")
 	cmd2.Env = os.Environ()
 	cmd2.Stdout = os.Stdout
 	cmd2.Stderr = os.Stderr
-	err = cmd2.Run()
+	err := cmd2.Run()
 	if err != nil {
 		log.Printf("Error running flase command: %v", err)
 		return fmt.Errorf("error running flash command: %w", err)
@@ -299,16 +313,85 @@ func FotaDaemon() error {
 		log.Printf("File %s exists.\n", daemonBinary)
 	}
 
-	cmd1 := exec.Command("tar", "-xvf", daemonBinary, "-C", daemonPath)
-	cmd1.Env = os.Environ()
-	cmd1.Stdout = os.Stdout
-	cmd1.Stderr = os.Stderr
-	err := cmd1.Run()
+	extractDirPath := "/tmp/tmp_daemon"
+	localPath := "/mnt/getac"
+
+	err := os.MkdirAll(extractDirPath, 0755)
 	if err != nil {
-		log.Printf("Error running flash command: %v", err)
-		return fmt.Errorf("error running flash: %w", err)
+		log.Printf("Error creating directory: %v", err)
+	} else {
+		log.Printf("Directory created successfully: %s", extractDirPath)
 	}
 
+	if _, err := os.Stat(extractDirPath); os.IsNotExist(err) {
+		log.Printf("Directory does not exist: %s", extractDirPath)
+	} else {
+		log.Printf("Directory exists: %s", extractDirPath)
+	}
+
+	//Get Folder list
+	cmd := exec.Command("tar", "--strip-components=1", "-xf", daemonBinary, "-C", extractDirPath)
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		log.Printf("Error running tar command: %v", err)
+	}
+
+	//Get the list of files/folders extracted
+	contents, err := os.ReadDir(extractDirPath)
+	if err != nil {
+		log.Printf("Error reading directory contents: %v", err)
+	}
+	log.Printf("%v\n", contents)
+
+	//Remove files or directories based on their type
+	for _, item := range contents {
+		itemPath := filepath.Join(localPath, item.Name())
+		if item.IsDir() {
+			// If it's a directory, remove it
+			err = os.RemoveAll(itemPath)
+			if err != nil {
+				log.Printf("Error removing directory: %v", err)
+			} else {
+				log.Printf("Removed directory: %s", itemPath)
+			}
+		} else {
+			// If it's a file, remove it
+			err = os.Remove(itemPath)
+			if err != nil {
+				log.Printf("Error removing file: %v", err)
+			} else {
+				log.Printf("Removed file: %s", itemPath)
+			}
+		}
+	}
+
+	cmd = exec.Command("tar", "--strip-components=1", "-xf", daemonBinary, "-C", daemonPath)
+	err = cmd.Run()
+	if err != nil {
+		log.Printf("Error : %v", err)
+		return fmt.Errorf("error running tar: %w", err)
+	}
+
+	cmd = exec.Command("./web/sh/cleanup.sh", "getac")
+	err = cmd.Run()
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err != nil {
+		log.Printf("Error running cleanup.sh: %v", err)
+	}
+
+	cmd = exec.Command("sync")
+	err = cmd.Run()
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err != nil {
+		log.Printf("sync: %v", err)
+	}
 	return nil
 }
 
@@ -320,14 +403,84 @@ func FotaFlash() error {
 		log.Printf("File %s exists.\n", flashBinary)
 	}
 
-	cmd1 := exec.Command("tar", "-xvf", flashBinary, "-C", flashPath)
-	cmd1.Env = os.Environ()
-	cmd1.Stdout = os.Stdout
-	cmd1.Stderr = os.Stderr
-	err := cmd1.Run()
+	extractDirPath := "/tmp/tmp_flash"
+	localPath := "/mnt/flash"
+
+	err := os.MkdirAll(extractDirPath, 0755)
 	if err != nil {
-		log.Printf("Error running flash command: %v", err)
-		return fmt.Errorf("error running flash: %w", err)
+		log.Printf("Error creating directory: %v", err)
+	} else {
+		log.Printf("Directory created successfully: %s", extractDirPath)
+	}
+
+	if _, err := os.Stat(extractDirPath); os.IsNotExist(err) {
+		log.Printf("Directory does not exist: %s", extractDirPath)
+	} else {
+		log.Printf("Directory exists: %s", extractDirPath)
+	}
+
+	//Get Folder list
+	cmd := exec.Command("tar", "--strip-components=1", "-xf", flashBinary, "-C", extractDirPath)
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		log.Printf("Error running tar command: %v", err)
+	}
+
+	//Get the list of files/folders extracted
+	contents, err := os.ReadDir(extractDirPath)
+	if err != nil {
+		log.Printf("Error reading directory contents: %v", err)
+	}
+	log.Printf("%v\n", contents)
+
+	//Remove files or directories based on their type
+	for _, item := range contents {
+		itemPath := filepath.Join(localPath, item.Name())
+		if item.IsDir() {
+			// If it's a directory, remove it
+			err = os.RemoveAll(itemPath)
+			if err != nil {
+				log.Printf("Error removing directory: %v", err)
+			} else {
+				log.Printf("Removed directory: %s", itemPath)
+			}
+		} else {
+			// If it's a file, remove it
+			err = os.Remove(itemPath)
+			if err != nil {
+				log.Printf("Error removing file: %v", err)
+			} else {
+				log.Printf("Removed file: %s", itemPath)
+			}
+		}
+	}
+
+	cmd = exec.Command("tar", "--strip-components=1", "-xf", flashBinary, "-C", flashPath)
+	err = cmd.Run()
+	if err != nil {
+		log.Printf("Error running extract command: %v", err)
+		return fmt.Errorf("Error running extract command: %w", err)
+	}
+
+	cmd = exec.Command("./web/sh/cleanup.sh", "flash")
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		log.Printf("Error running cleanup.sh: %v", err)
+	}
+
+	cmd = exec.Command("sync")
+	err = cmd.Run()
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err != nil {
+		log.Printf("sync: %v", err)
 	}
 	return nil
 }
