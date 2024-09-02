@@ -53,7 +53,7 @@
         $(document).ready(function () {
             // update project code
             document.title = "Getac " + projectCode;
-            document.getElementById("title-bar-textContent").textContent = "Sensor Hub " + projectCode;
+            document.getElementById("title-bar-textContent").textContent = "CA-NF22 " + projectCode;
 
             // console.log("index.html DOM ready! trying to start MQTT connection...");
             mqtt_Connect_with_Broker_WS();
@@ -83,7 +83,7 @@
     </script>
     <div class="title-bar">
         <img src="/static/img/Getac_Logo.png" alt="Logo" class="title-bar-logo" ondblclick="toggleFooter()">
-        <div class="title-bar-text" id="title-bar-textContent">Sensor Hub (projectCode)</div>
+        <div class="title-bar-text" id="title-bar-textContent">CA-NF22 (projectCode)</div>
         <input type="text" class="form-control" id="txt_MQTT_Broker_URL">
     </div>
 
